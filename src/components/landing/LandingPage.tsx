@@ -102,9 +102,9 @@ export default function LandingPage() {
           className="flex items-center gap-8 mb-12"
         >
           {[
-            { icon: Eye, label: "CASES", value: "4" },
-            { icon: Search, label: "EVIDENCE", value: "48+" },
-            { icon: ScanLine, label: "SUSPECTS", value: "12+" },
+            { icon: Eye, label: "CASES", value: "8" },
+            { icon: Search, label: "EVIDENCE", value: "100+" },
+            { icon: ScanLine, label: "SUSPECTS", value: "30+" },
           ].map((stat) => (
             <div key={stat.label} className="flex items-center gap-3">
               <stat.icon className="w-4 h-4 text-detective-red/60" />
