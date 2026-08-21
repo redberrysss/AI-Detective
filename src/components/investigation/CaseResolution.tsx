@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useInvestigationStore } from "@/stores/investigation-store";
 import { motion } from "framer-motion";
 import { X, Star } from "lucide-react";
@@ -8,14 +9,17 @@ import { Deduction, InvestigationScore } from "@/types";
 interface CaseResolutionProps {
   deduction: Deduction;
   score: InvestigationScore;
+  leaderboardRank?: number | null;
 }
 
 export default function CaseResolution({
   deduction,
   score,
+  leaderboardRank,
 }: CaseResolutionProps) {
   const { currentCase, showResolution, setShowResolution } =
     useInvestigationStore();
+  const router = useRouter();
   if (!currentCase || !showResolution) return null;
   const { hiddenSolution } = currentCase;
 
@@ -55,6 +59,12 @@ export default function CaseResolution({
           <div className="text-sm font-mono text-detective-amber tracking-wider">
             {score.rank}
           </div>
+          {leaderboardRank != null && (
+            <div className="text-[10px] font-mono text-detective-muted tracking-widest mt-3">
+              FASTEST DETECTIVES — POSITION{" "}
+              <span className="text-detective-amber">#{leaderboardRank}</span>
+            </div>
+          )}
         </div>
 
         {/* Breakdown */}
@@ -212,6 +222,22 @@ export default function CaseResolution({
               </motion.div>
             ))}
           </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
+          <button
+            onClick={() => setShowResolution(false)}
+            className="flex-1 px-6 py-3 border border-white/10 text-white/70 font-mono text-xs tracking-wider hover:border-white/25 hover:text-white transition-all duration-300"
+          >
+            REVIEW INVESTIGATION
+          </button>
+          <button
+            onClick={() => router.push("/cases")}
+            className="flex-1 px-6 py-3 bg-detective-red text-white font-mono text-xs tracking-wider hover:bg-detective-red-dim transition-all duration-300"
+          >
+            BACK TO CASES
+          </button>
         </div>
       </motion.div>
     </div>

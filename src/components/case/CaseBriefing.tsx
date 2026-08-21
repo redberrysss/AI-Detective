@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
@@ -15,6 +16,9 @@ import { Badge } from "@/components/ui/badge";
 import { getDifficultyColor } from "@/lib/utils";
 import { useInvestigationStore } from "@/stores/investigation-store";
 import { Case } from "@/types";
+import { getPlayerName, savePlayerName } from "@/lib/player";
+import PlayerNameDialog from "./PlayerNameDialog";
+import CaseLeaderboard from "./CaseLeaderboard";
 
 interface CaseBriefingProps {
   caseData: Case;
@@ -24,11 +28,28 @@ export default function CaseBriefing({ caseData }: CaseBriefingProps) {
   const router = useRouter();
   const { setCurrentCase, startInvestigation } = useInvestigationStore();
   const { metadata, victim, suspects, evidence } = caseData;
+  const [nameDialogOpen, setNameDialogOpen] = useState(false);
+  const [playerName] = useState(() => getPlayerName() ?? "");
 
-  const handleStart = () => {
+  const beginCase = () => {
     setCurrentCase(caseData);
     startInvestigation(metadata.id);
     router.push(`/cases/${metadata.id}/investigate`);
+  };
+
+  const handleStart = () => {
+    const existing = getPlayerName();
+    if (existing) {
+      beginCase();
+    } else {
+      setNameDialogOpen(true);
+    }
+  };
+
+  const handleConfirmName = (name: string) => {
+    savePlayerName(name);
+    setNameDialogOpen(false);
+    beginCase();
   };
 
   return (
@@ -217,13 +238,21 @@ export default function CaseBriefing({ caseData }: CaseBriefingProps) {
           </div>
         </motion.div>
 
+        {/* Leaderboard */}
+        <CaseLeaderboard caseId={metadata.id} />
+
         {/* Start Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="flex justify-center"
+          className="flex flex-col items-center gap-3"
         >
+          {playerName && (
+            <span className="text-[10px] font-mono text-detective-muted tracking-widest">
+              PLAYING AS <span className="text-white/70">{playerName}</span>
+            </span>
+          )}
           <button
             onClick={handleStart}
             className="group relative px-12 py-4 bg-detective-red text-white font-mono text-sm tracking-wider hover:bg-detective-red-dim transition-all duration-300 flex items-center gap-3"
@@ -233,6 +262,8 @@ export default function CaseBriefing({ caseData }: CaseBriefingProps) {
           </button>
         </motion.div>
       </div>
+
+      <PlayerNameDialog open={nameDialogOpen} onConfirm={handleConfirmName} />
     </div>
   );
 }

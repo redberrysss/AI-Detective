@@ -1,8 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useInvestigationStore } from "@/stores/investigation-store";
 import { useTimer } from "@/hooks/use-timer";
-import { FileText, Users, MapPin, Clock, Link2, Brain, PenLine, AlertTriangle, Volume2, VolumeX, ChevronRight } from "lucide-react";
+import { FileText, Users, MapPin, Clock, Link2, Brain, PenLine, AlertTriangle, Volume2, VolumeX, ChevronRight, LogOut } from "lucide-react";
 import CenterWorkspace from "./CenterWorkspace";
 import AIAssistant from "./AIAssistant";
 
@@ -63,6 +64,7 @@ function WorkspaceContent({
   setShowDeduction: (s: boolean) => void;
 }) {
   const { formatted } = useTimer(state.startTime);
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-detective-surface flex flex-col">
@@ -108,6 +110,14 @@ function WorkspaceContent({
             ) : (
               <Volume2 className="w-3.5 h-3.5" />
             )}
+          </button>
+          <button
+            onClick={() => router.push("/cases")}
+            title="Leave the investigation"
+            className="flex items-center gap-1.5 text-detective-muted hover:text-detective-red transition-colors font-mono tracking-widest"
+          >
+            EXIT CASE
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

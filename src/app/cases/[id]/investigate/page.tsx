@@ -9,6 +9,7 @@ import DeductionForm from "@/components/investigation/DeductionForm";
 import CaseResolution from "@/components/investigation/CaseResolution";
 import { Deduction, InvestigationScore } from "@/types";
 import { calculateScore } from "@/lib/scoring";
+import { getPlayerName } from "@/lib/player";
 
 export default function InvestigatePage() {
   const params = useParams();
@@ -25,6 +26,7 @@ export default function InvestigatePage() {
   } = useInvestigationStore();
   const [score, setScore] = useState<InvestigationScore | null>(null);
   const [deduction, setDeduction] = useState<Deduction | null>(null);
+  const [leaderboardRank, setLeaderboardRank] = useState<number | null>(null);
 
   useEffect(() => {
     const caseData = getCaseById(id);
@@ -48,11 +50,12 @@ export default function InvestigatePage() {
   }
 
   const handleDeductionSubmit = (d: Deduction) => {
+    const durationSeconds = Math.floor((Date.now() - state.startTime) / 1000);
     const s = calculateScore(
       d,
       currentCase,
       state.hintsUsed,
-      Math.floor((Date.now() - state.startTime) / 1000),
+      durationSeconds,
       state.contradictionsFound.length
     );
     setDeduction(d);
@@ -60,6 +63,27 @@ export default function InvestigatePage() {
     setShowDeduction(false);
     setShowResolution(true);
     setInvestigationComplete(true);
+
+    const playerName = getPlayerName();
+    if (playerName) {
+      fetch("/api/scores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caseId: id,
+          playerName,
+          durationSeconds,
+          hintsUsed: state.hintsUsed,
+          totalScore: s.total,
+          correct: s.correctSuspect,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data: { rank?: number | null }) => {
+          if (typeof data.rank === "number") setLeaderboardRank(data.rank);
+        })
+        .catch(() => {});
+    }
   };
 
   return (
@@ -67,7 +91,11 @@ export default function InvestigatePage() {
       <InvestigationWorkspace />
       <DeductionForm onSubmit={handleDeductionSubmit} />
       {score && deduction && (
-        <CaseResolution deduction={deduction} score={score} />
+        <CaseResolution
+          deduction={deduction}
+          score={score}
+          leaderboardRank={leaderboardRank}
+        />
       )}
     </>
   );

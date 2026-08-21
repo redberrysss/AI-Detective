@@ -100,6 +100,13 @@ Without API key: The demo case works fully with deterministic data and pre-built
 
 See `.env.example` for required variables.
 
+## Leaderboard
+
+Each case has a shared "Fastest Detectives" leaderboard ranked by time to a correct deduction. Players are asked for their name once (remembered in the browser) before starting any case.
+
+- Requires `DATABASE_URL` (any Postgres, e.g. [Neon](https://neon.tech) free tier). The table is created automatically on first use.
+- Without `DATABASE_URL` the app works as before — the leaderboard simply stays hidden.
+
 ## Deployment
 
 Optimized for Vercel deployment:
